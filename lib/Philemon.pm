@@ -15,6 +15,7 @@ use Class::Accessor::Lite (
 );
 use Carp;
 use Guard;
+use File::Spec;
 
 sub create_process {
     my ($self, $file) = @_;

@@ -45,6 +45,7 @@
          "requires" : {
             "Carp" : "0",
             "Class::Accessor::Lite" : "0",
+            "File::Spec" : "0",
             "Guard" : "0",
             "Linux::Inotify2" : "0",
             "Log::Minimal" : "0",
@@ -62,5 +63,16 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/ytnobody/Philemon/issues"
+      },
+      "homepage" : "https://github.com/ytnobody/Philemon",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/ytnobody/Philemon.git",
+         "web" : "https://github.com/ytnobody/Philemon"
+      }
+   },
    "version" : "0.01"
 }
