@@ -19,6 +19,14 @@ use Guard;
 sub create_process {
     my ($self, $file) = @_;
 
+    my $max_processes = $self->max_processes || 8;
+
+    while (scalar(@{$self->processes}) >= $max_processes) {
+        warnf("Will be retried after a seconds, because number of processes is reached to max_processes");
+        sleep 1;
+        $self->cleanup_finished_childs;
+    }
+
     my $proc = Proc::Simple->new;
     $proc->{__guard} = guard { unlink $file } if $self->cleanup;
     $proc->start($self->task, $file);
@@ -44,12 +52,20 @@ sub run {
     $self->processes([]);
 
     my $target = $self->target;
-    my $max_processes = $self->max_processes || 8;
+
+    my @files = glob( File::Spec->catfile($self->target, '*') );
 
     my $inotify = Linux::Inotify2->new;
     $inotify->watch($target, IN_CREATE) or critf('could not watch %s : %s', $self->target, $!);
 
     infof('start watching %s in pid %s', $target, $$);
+
+    if (@files) {
+        for my $file (@files) { 
+            infof("new file: %s", $file);
+            $self->create_process($file);
+        }
+    }
 
     while (1) {
         $self->cleanup_finished_childs;
@@ -59,15 +75,7 @@ sub run {
         if (@events) {
             for my $event (@events) {
                 my $file = $event->fullname;
-
                 infof("new file: %s", $file);
-
-                while (scalar(@{$self->processes}) >= $max_processes) {
-                    warnf("Will be retried after a seconds, because number of processes is reached to max_processes");
-                    sleep 1;
-                    $self->cleanup_finished_childs;
-                }
-
                 $self->create_process($file);
             }
         }
